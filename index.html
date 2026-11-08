@@ -1,0 +1,616 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sharekati Loans</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090d0b;color:#f4f7f5;font-family:Arial,sans-serif}
+header{background:#101a14;padding:16px;border-bottom:1px solid #293d30;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h2{margin:0;color:#42d77b}
+nav{display:flex;gap:7px;flex-wrap:wrap}
+button{background:#20a85a;color:white;border:0;padding:11px 14px;border-radius:8px;font-weight:bold;cursor:pointer;margin:3px}
+.secondary{background:#26352b}
+.danger{background:#a93636}
+main{max-width:850px;margin:24px auto;padding:0 14px}
+.card{background:#111a14;border:1px solid #293d30;border-radius:12px;padding:18px;margin-bottom:15px}
+h1{font-size:25px}
+h3{color:#51d982}
+p{line-height:1.5;color:#c5d0c8}
+input,select,textarea{width:100%;padding:12px;margin:7px 0 14px;background:#080e0a;color:white;border:1px solid #35483a;border-radius:7px;font-size:15px}
+label{display:block;color:#d9e6dc;font-size:14px}
+.amount{font-size:25px;color:#4be084;font-weight:bold}
+.stat{display:inline-block;background:#17251b;border:1px solid #304b37;padding:12px;border-radius:8px;margin:4px}
+.status{display:inline-block;background:#283b2d;padding:5px 9px;border-radius:20px;font-size:12px;color:#9ef0b7}
+.notice{padding:12px;background:#17251b;border-left:3px solid #36c96f;border-radius:5px;margin:12px 0}
+hr{border:0;border-top:1px solid #2b3b30;margin:18px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1}
+.hidden{display:none!important}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{text-align:left;padding:10px;border-bottom:1px solid #304035}
+@media(max-width:500px){header{align-items:flex-start}nav{width:100%}nav button{flex:1;padding:10px 5px}main{margin-top:15px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+<h2>SHAREKATI LOANS</h2>
+<nav>
+<button class="secondary" onclick="home()">Home</button>
+<button class="secondary" onclick="showLogin()">Customer Login</button>
+<button class="secondary" onclick="showAdminLogin()">Admin</button>
+</nav>
+</header>
+
+<main>
+<section id="homePage">
+<div class="card">
+<h1>Simple. Flexible. Accessible.</h1>
+<p>Sharekati Loans provides a simple loan application process. Applicants must provide registration details matching their official identification document. Identity verification is required.</p>
+<h3>Select your country</h3>
+<button onclick="selectCountry('Uganda')">🇺🇬 Uganda</button>
+<button onclick="selectCountry('South Sudan')">🇸🇸 South Sudan</button>
+</div>
+<div class="card">
+<h3>Application process</h3>
+<p>1. Select country and loan amount.</p>
+<p>2. Register your customer account.</p>
+<p>3. Pay the separate 29% qualification fee.</p>
+<p>4. Admin manually confirms payment.</p>
+<p>5. KYC unlocks after admin confirmation.</p>
+<p>6. Track your application.</p>
+</div>
+</section>
+
+<section id="calculatorPage" class="hidden">
+<div class="card">
+<button class="secondary" onclick="home()">← Back</button>
+<h2 id="countryTitle"></h2>
+<p>Minimum loan: <b id="minimumText"></b></p>
+<label>Loan amount</label>
+<input id="loanAmount" type="number" min="1" placeholder="Enter loan amount">
+<div class="notice">
+<p>Separate qualification fee — 29%</p>
+<div class="amount" id="feePreview">0</div>
+<p>Interest: 0%</p>
+<p>Repayment period: <b id="daysPreview">30 days</b></p>
+</div>
+<button onclick="calculate()">Continue</button>
+</div>
+</section>
+
+<section id="registerPage" class="hidden">
+<div class="card">
+<button class="secondary" onclick="backToCalculator()">← Back</button>
+<h2>Create customer account</h2>
+<div id="registrationSummary" class="notice"></div>
+<label>Full name</label><input id="regName" placeholder="Full name as shown on ID">
+<label>Phone number</label><input id="regPhone" placeholder="Phone number">
+<label>Username</label><input id="regUsername" placeholder="Choose username">
+<label>Password</label><input id="regPassword" type="password" placeholder="Create password">
+<label>Confirm password</label><input id="regConfirm" type="password" placeholder="Confirm password">
+<button onclick="register()">Create account</button>
+</div>
+</section>
+
+<section id="loginPage" class="hidden">
+<div class="card">
+<h2>Customer Login</h2>
+<label>Username</label><input id="loginUsername" placeholder="Username">
+<label>Password</label><input id="loginPassword" type="password" placeholder="Password">
+<button onclick="customerLogin()">Login</button>
+</div>
+</section>
+
+<section id="customerPage" class="hidden">
+<div class="card">
+<div class="row">
+<div><h2 id="customerWelcome"></h2><p id="customerCountry"></p></div>
+<div><button class="secondary" onclick="customerLogout()">Logout</button></div>
+</div>
+<div id="customerOverview"></div>
+</div>
+
+<div id="paymentPanel" class="card hidden">
+<h3>Step 1 — Qualification fee payment</h3>
+<p>Pay your separate 29% qualification fee to the MTN number below. KYC remains locked until the admin manually confirms your payment.</p>
+<div class="notice">
+<p>Requested loan</p><div class="amount" id="payLoan"></div>
+<p>29% qualification fee</p><div class="amount" id="payFee"></div>
+<p>MTN number: <b>+256 778 302 547</b></p>
+<p>Account name: <b>EMMANUEL CHEMOS</b></p>
+</div>
+<label>Payment transaction reference</label>
+<input id="paymentReference" placeholder="Enter transaction/reference number">
+<button onclick="submitPayment()">Submit payment reference</button>
+<p id="paymentMessage"></p>
+</div>
+
+<div id="kycPanel" class="card hidden">
+<h3>Step 2 — KYC verification</h3>
+<div class="notice">Your payment has been manually confirmed by the admin. KYC is now unlocked. Verification time: about 20 seconds to up to 1 minute.</div>
+<label>ID type</label>
+<select id="idType">
+<option value="">Select ID type</option>
+<option>National ID</option>
+<option>Passport</option>
+<option>Driver's License</option>
+</select>
+<label>ID number</label><input id="idNumber" placeholder="Enter ID number">
+<label>Upload one ID document</label><input id="idFile" type="file" accept="image/*,.pdf">
+<button onclick="submitKyc()">Submit KYC</button>
+<p id="kycMessage"></p>
+</div>
+
+<div id="trackingPanel" class="card">
+<h3>Step 3 — Application tracking</h3>
+<div id="trackingDetails"></div>
+<hr>
+<h3>Repayment information</h3>
+<div id="repaymentDetails"></div>
+<hr>
+<h3>Admin message</h3>
+<div id="customerMessage" class="notice"></div>
+<button class="secondary" onclick="requestRefund()">Request refund review</button>
+<p id="refundMessage"></p>
+</div>
+
+<div class="card">
+<h3>Account settings</h3>
+<label>New password</label><input id="newPassword" type="password" placeholder="New password">
+<button class="secondary" onclick="changePassword()">Change password</button>
+</div>
+</section>
+
+<section id="adminLoginPage" class="hidden">
+<div class="card">
+<h2>Admin Login</h2>
+<label>Username</label><input id="adminUsername" placeholder="Admin username">
+<label>Password</label><input id="adminPassword" type="password" placeholder="Admin password">
+<button onclick="adminLogin()">Login</button>
+</div>
+</section>
+
+<section id="adminPage" class="hidden">
+<div class="card">
+<div class="row"><h2>Admin Dashboard</h2><button class="secondary" onclick="adminLogout()">Logout</button></div>
+<div id="adminStats"></div>
+</div>
+<div class="card">
+<h3>Customer applications</h3>
+<input id="adminSearch" placeholder="Search customer name, username or phone" oninput="renderCustomers()">
+<div id="customerList"></div>
+</div>
+<div id="adminProfile" class="card hidden">
+<h3>Manage customer</h3>
+<div id="profileDetails"></div>
+<hr>
+<h3>Manual payment verification</h3>
+<p>Check the customer's MTN transaction yourself before choosing a status.</p>
+<div class="notice">
+<p>Submitted reference: <b id="adminReference"></b></p>
+<p>Qualification fee: <b id="adminFee"></b></p>
+</div>
+<button onclick="confirmPayment()">Confirm Payment</button>
+<button class="danger" onclick="rejectPayment()">Reject Payment</button>
+<hr>
+<label>Application status</label>
+<select id="editApplication">
+<option>Received</option><option>Under Review</option><option>Approved</option><option>Rejected</option><option>Disbursed</option><option>Completed</option>
+</select>
+<label>KYC status</label>
+<select id="editKyc">
+<option>Locked</option><option>Pending</option><option>Under Review</option><option>Verified</option><option>Rejected</option>
+</select>
+<label>Eligibility</label>
+<select id="editEligibility">
+<option>Pending</option><option>Eligible</option><option>Not Eligible</option>
+</select>
+<label>Refund status</label>
+<select id="editRefund">
+<option>Not Requested</option><option>Requested</option><option>Under Review</option><option>Approved</option><option>Rejected</option><option>Refunded</option>
+</select>
+<label>Admin message to customer</label>
+<textarea id="editMessage" rows="3" placeholder="Write message"></textarea>
+<button onclick="saveProfile()">Save updates</button>
+<hr>
+<h3>Password management</h3>
+<button class="secondary" onclick="resetPassword()">Generate temporary password</button>
+<div id="temporaryPassword"></div>
+<hr>
+<button class="danger" onclick="deleteCustomer()">Delete customer</button>
+</div>
+</section>
+</main>
+
+<script>
+const KEY="sharekatiStage1Customers";
+const ADMIN_USER="admin";
+const ADMIN_PASS="Sharekati@123";
+
+let selectedCountry="";
+let currentLoan=0;
+let currentCustomer=null;
+let selectedAdminCustomer=null;
+
+function getCustomers(){
+ try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}
+}
+function saveCustomers(list){localStorage.setItem(KEY,JSON.stringify(list))}
+function money(n,c){return new Intl.NumberFormat("en-US").format(Number(n)||0)+" "+c}
+function currency(country){return country==="Uganda"?"UGX":"SSP"}
+function minimum(country){return country==="Uganda"?163623:117510}
+function feeFor(amount){return Math.round(Number(amount)*0.29)}
+
+function repaymentDays(amount){
+ if(amount<=300000)return 30;
+ if(amount<=500000)return 60;
+ if(amount<=1000000)return 90;
+ if(amount<=2000000)return 120;
+ return 180;
+}
+
+function show(id){
+ ["homePage","calculatorPage","registerPage","loginPage","customerPage","adminLoginPage","adminPage"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ window.scrollTo(0,0);
+}
+function home(){show("homePage")}
+function selectCountry(country){
+ selectedCountry=country;
+ document.getElementById("countryTitle").textContent=country+" loan calculator";
+ document.getElementById("minimumText").textContent=money(minimum(country),currency(country));
+ document.getElementById("loanAmount").value="";
+ document.getElementById("feePreview").textContent=money(0,currency(country));
+ document.getElementById("daysPreview").textContent="30 days";
+ show("calculatorPage");
+}
+
+document.getElementById("loanAmount").addEventListener("input",()=>{
+ const amount=Number(document.getElementById("loanAmount").value)||0;
+ document.getElementById("feePreview").textContent=money(feeFor(amount),currency(selectedCountry));
+ document.getElementById("daysPreview").textContent=repaymentDays(amount)+" days";
+});
+
+function calculate(){
+ const amount=Number(document.getElementById("loanAmount").value);
+ if(!selectedCountry||!Number.isFinite(amount)||amount<minimum(selectedCountry)){
+  alert("Enter an amount equal to or above the minimum loan.");return;
+ }
+ currentLoan=amount;
+ document.getElementById("registrationSummary").innerHTML=
+ "Country: <b>"+selectedCountry+"</b><br>Loan: <b>"+money(amount,currency(selectedCountry))+"</b><br>Separate 29% fee: <b>"+money(feeFor(amount),currency(selectedCountry))+"</b><br>Repayment period: <b>"+repaymentDays(amount)+" days</b>";
+ show("registerPage");
+}
+function backToCalculator(){show("calculatorPage")}
+
+async function hashPassword(value){
+ const data=new TextEncoder().encode(value);
+ const digest=await crypto.subtle.digest("SHA-256",data);
+ return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function register(){
+ const name=document.getElementById("regName").value.trim();
+ const phone=document.getElementById("regPhone").value.trim();
+ const username=document.getElementById("regUsername").value.trim().toLowerCase();
+ const password=document.getElementById("regPassword").value;
+ const confirmPassword=document.getElementById("regConfirm").value;
+
+ if(!name||!phone||!username||!password){alert("Complete all fields.");return}
+ if(password.length<6){alert("Password must be at least 6 characters.");return}
+ if(password!==confirmPassword){alert("Passwords do not match.");return}
+
+ const list=getCustomers();
+ if(list.some(c=>c.username===username)){alert("Username already registered.");return}
+
+ const customer={
+  id:"SH"+Date.now(),name,country:selectedCountry,phone,username,
+  passwordHash:await hashPassword(password),
+  loan:currentLoan,fee:feeFor(currentLoan),currency:currency(selectedCountry),
+  repaymentDays:repaymentDays(currentLoan),
+  paymentStatus:"Pending",paymentReference:"",
+  applicationStatus:"Received",kycStatus:"Locked",
+  eligibility:"Pending",refundStatus:"Not Requested",
+  idType:"",idNumber:"",idFilename:"",
+  adminMessage:"Your registration has been received. Please pay the separate qualification fee.",
+  createdAt:new Date().toISOString(),mustChangePassword:false
+ };
+
+ list.push(customer);
+ saveCustomers(list);
+ currentCustomer=customer.id;
+ renderCustomer();
+ show("customerPage");
+}
+
+function showLogin(){show("loginPage")}
+async function customerLogin(){
+ const username=document.getElementById("loginUsername").value.trim().toLowerCase();
+ const password=document.getElementById("loginPassword").value;
+ const customer=getCustomers().find(c=>c.username===username);
+ if(!customer||!customer.passwordHash||customer.passwordHash!==await hashPassword(password)){
+  alert("Incorrect username or password.");return;
+ }
+ currentCustomer=customer.id;
+ renderCustomer();
+ show("customerPage");
+}
+
+function updateCustomer(mutator){
+ const list=getCustomers();
+ const index=list.findIndex(c=>c.id===currentCustomer);
+ if(index<0)return null;
+ mutator(list[index]);
+ saveCustomers(list);
+ return list[index];
+}
+
+function renderCustomer(){
+ const c=getCustomers().find(x=>x.id===currentCustomer);
+ if(!c)return;
+
+ document.getElementById("customerWelcome").textContent="Welcome, "+c.name;
+ document.getElementById("customerCountry").textContent=c.country+" • Account: "+c.username;
+
+ document.getElementById("customerOverview").innerHTML=
+ '<div class="stat">Loan requested<br><b>'+money(c.loan,c.currency)+'</b></div>'+
+ '<div class="stat">Separate fee<br><b>'+money(c.fee,c.currency)+'</b></div>'+
+ '<div class="stat">Repayment<br><b>'+c.repaymentDays+' days</b></div>';
+
+ const confirmed=c.paymentStatus==="Confirmed";
+ document.getElementById("paymentPanel").classList.toggle("hidden",confirmed);
+ document.getElementById("kycPanel").classList.toggle("hidden",!confirmed);
+
+ document.getElementById("payLoan").textContent=money(c.loan,c.currency);
+ document.getElementById("payFee").textContent=money(c.fee,c.currency);
+
+ document.getElementById("paymentMessage").textContent=
+ c.paymentStatus==="Reference Submitted"?"Your reference is awaiting manual admin verification.":
+ c.paymentStatus==="Rejected"?"Your payment reference was rejected. Submit a valid reference.":"";
+
+ document.getElementById("trackingDetails").innerHTML=
+ "<p>Application: <b>"+c.applicationStatus+"</b></p>"+
+ "<p>Payment: <b>"+c.paymentStatus+"</b></p>"+
+ "<p>KYC: <b>"+c.kycStatus+"</b></p>"+
+ "<p>Eligibility: <b>"+c.eligibility+"</b></p>"+
+ "<p>Refund: <b>"+c.refundStatus+"</b></p>";
+
+ document.getElementById("repaymentDetails").innerHTML=
+ "<p>Principal: <b>"+money(c.loan,c.currency)+"</b></p>"+
+ "<p>Interest: <b>0%</b></p>"+
+ "<p>Repayment period: <b>"+c.repaymentDays+" days</b></p>"+
+ "<p>The qualification fee is separate and is not deducted from the loan or added to repayment.</p>";
+
+ document.getElementById("customerMessage").textContent=c.adminMessage||"No new messages.";
+ document.getElementById("kycMessage").textContent=
+ c.kycStatus==="Verified"?"Your KYC has been verified.":
+ c.kycStatus==="Rejected"?"Your KYC requires another review.":"";
+}
+
+function submitPayment(){
+ const reference=document.getElementById("paymentReference").value.trim();
+ if(!reference){alert("Enter the payment transaction reference.");return}
+
+ const c=updateCustomer(x=>{
+  if(x.paymentStatus!=="Confirmed"){
+   x.paymentReference=reference;
+   x.paymentStatus="Reference Submitted";
+   x.adminMessage="Your payment reference has been submitted for manual verification.";
+  }
+ });
+ if(c){
+  renderCustomer();
+  alert("Reference submitted. The admin must manually verify your payment.");
+ }
+}
+
+function submitKyc(){
+ const c=getCustomers().find(x=>x.id===currentCustomer);
+ if(!c||c.paymentStatus!=="Confirmed"){
+  alert("KYC is locked until the admin confirms the 29% payment.");return;
+ }
+
+ const type=document.getElementById("idType").value;
+ const number=document.getElementById("idNumber").value.trim();
+ const file=document.getElementById("idFile").files[0];
+
+ if(!type||!number||!file){alert("Complete ID details and upload your document.");return}
+ if(file.size>5*1024*1024){alert("Maximum document size is 5MB.");return}
+
+ updateCustomer(x=>{
+  x.idType=type;x.idNumber=number;x.idFilename=file.name;
+  x.kycStatus="Pending";
+  x.applicationStatus="Under Review";
+  x.adminMessage="Your KYC has been submitted for review.";
+ });
+
+ renderCustomer();
+ document.getElementById("kycMessage").textContent="KYC submitted successfully.";
+}
+
+function requestRefund(){
+ const c=getCustomers().find(x=>x.id===currentCustomer);
+ if(!c)return;
+ if(c.refundStatus==="Requested"||c.refundStatus==="Under Review"){
+  alert("Your refund request is already being reviewed.");return;
+ }
+ updateCustomer(x=>{
+  x.refundStatus="Requested";
+  x.adminMessage="Your refund request has been submitted for review.";
+ });
+ renderCustomer();
+ document.getElementById("refundMessage").textContent="Refund review requested.";
+}
+
+async function changePassword(){
+ const password=document.getElementById("newPassword").value;
+ if(password.length<6){alert("Enter a password with at least 6 characters.");return}
+ const hash=await hashPassword(password);
+ updateCustomer(x=>{x.passwordHash=hash;x.mustChangePassword=false});
+ document.getElementById("newPassword").value="";
+ alert("Password changed.");
+}
+
+function customerLogout(){currentCustomer=null;showLogin()}
+function showAdminLogin(){show("adminLoginPage")}
+
+function adminLogin(){
+ if(document.getElementById("adminUsername").value===ADMIN_USER&&
+ document.getElementById("adminPassword").value===ADMIN_PASS){
+  loadAdmin();show("adminPage");
+ }else alert("Incorrect admin login.");
+}
+
+function loadAdmin(){
+ const list=getCustomers();
+ const count=s=>list.filter(c=>c.paymentStatus===s).length;
+ document.getElementById("adminStats").innerHTML=
+ '<div class="stat">Customers<br><b>'+list.length+'</b></div>'+
+ '<div class="stat">Awaiting payment<br><b>'+count("Pending")+'</b></div>'+
+ '<div class="stat">References submitted<br><b>'+count("Reference Submitted")+'</b></div>'+
+ '<div class="stat">Confirmed payments<br><b>'+count("Confirmed")+'</b></div>';
+ renderCustomers();
+}
+
+function escapeHTML(s){
+ return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+function renderCustomers(){
+ const search=(document.getElementById("adminSearch")?.value||"").toLowerCase();
+ const list=getCustomers().filter(c=>(c.name+" "+c.username+" "+c.phone).toLowerCase().includes(search));
+
+ document.getElementById("customerList").innerHTML=list.length?list.map(c=>
+ '<div class="notice"><b>'+escapeHTML(c.name)+'</b><br>'+
+ escapeHTML(c.country)+' • '+escapeHTML(c.username)+'<br>'+
+ 'Loan: '+money(c.loan,c.currency)+'<br>'+
+ 'Payment: <span class="status">'+escapeHTML(c.paymentStatus)+'</span><br>'+
+ 'KYC: '+escapeHTML(c.kycStatus)+'<br>'+
+ '<button class="secondary" onclick="openProfile(\''+c.id+'\')">Manage customer</button></div>'
+ ).join(""):"<p>No customer records found.</p>";
+}
+
+function openProfile(id){
+ selectedAdminCustomer=id;
+ const c=getCustomers().find(x=>x.id===id);
+ if(!c)return;
+
+ document.getElementById("adminProfile").classList.remove("hidden");
+ document.getElementById("profileDetails").innerHTML=
+ "<p>Name: <b>"+escapeHTML(c.name)+"</b></p>"+
+ "<p>Username: "+escapeHTML(c.username)+"</p>"+
+ "<p>Phone: "+escapeHTML(c.phone)+"</p>"+
+ "<p>Country: "+escapeHTML(c.country)+"</p>"+
+ "<p>Loan: "+money(c.loan,c.currency)+"</p>"+
+ "<p>Qualification fee: "+money(c.fee,c.currency)+"</p>"+
+ "<p>ID type: "+escapeHTML(c.idType||"Not submitted")+"</p>"+
+ "<p>ID number: "+escapeHTML(c.idNumber||"Not submitted")+"</p>"+
+ "<p>Document filename: "+escapeHTML(c.idFilename||"Not submitted")+"</p>";
+
+ document.getElementById("adminReference").textContent=c.paymentReference||"Not submitted";
+ document.getElementById("adminFee").textContent=money(c.fee,c.currency);
+ document.getElementById("editApplication").value=c.applicationStatus;
+ document.getElementById("editKyc").value=c.kycStatus;
+ document.getElementById("editEligibility").value=c.eligibility;
+ document.getElementById("editRefund").value=c.refundStatus;
+ document.getElementById("editMessage").value=c.adminMessage||"";
+ document.getElementById("temporaryPassword").textContent="";
+}
+
+function confirmPayment(){
+ const list=getCustomers();
+ const i=list.findIndex(c=>c.id===selectedAdminCustomer);
+ if(i<0)return;
+ const c=list[i];
+
+ if(!c.paymentReference||c.paymentStatus!=="Reference Submitted"){
+  alert("There is no submitted payment reference awaiting verification.");return;
+ }
+
+ if(!confirm("Have you personally verified the 29% payment? Confirm only after checking your MTN transaction."))return;
+
+ c.paymentStatus="Confirmed";
+ c.kycStatus="Pending";
+ c.adminMessage="Your qualification fee has been manually confirmed. You can now complete KYC.";
+ saveCustomers(list);
+ loadAdmin();
+ openProfile(c.id);
+ alert("Payment manually confirmed. KYC is now unlocked.");
+}
+
+function rejectPayment(){
+ const list=getCustomers();
+ const i=list.findIndex(c=>c.id===selectedAdminCustomer);
+ if(i<0)return;
+ const c=list[i];
+
+ if(!c.paymentReference||c.paymentStatus!=="Reference Submitted"){
+  alert("No submitted reference is awaiting rejection.");return;
+ }
+
+ if(!confirm("Reject this payment reference?"))return;
+
+ c.paymentStatus="Rejected";
+ c.kycStatus="Locked";
+ c.adminMessage="Your payment reference was rejected. Please contact support or submit a valid reference.";
+ saveCustomers(list);
+ loadAdmin();
+ openProfile(c.id);
+ alert("Payment reference rejected. KYC remains locked.");
+}
+
+function saveProfile(){
+ const list=getCustomers();
+ const i=list.findIndex(c=>c.id===selectedAdminCustomer);
+ if(i<0)return;
+
+ const c=list[i];
+ c.applicationStatus=document.getElementById("editApplication").value;
+ c.kycStatus=document.getElementById("editKyc").value;
+ c.eligibility=document.getElementById("editEligibility").value;
+ c.refundStatus=document.getElementById("editRefund").value;
+ c.adminMessage=document.getElementById("editMessage").value.trim();
+
+ // Payment confirmation by admin is required before KYC can unlock.
+ if(c.paymentStatus!=="Confirmed"){
+  c.kycStatus="Locked";
+  alert("KYC remains locked until you manually confirm payment.");
+ }
+
+ saveCustomers(list);
+ loadAdmin();
+ openProfile(c.id);
+ alert("Customer updates saved.");
+}
+
+async function resetPassword(){
+ const list=getCustomers();
+ const i=list.findIndex(c=>c.id===selectedAdminCustomer);
+ if(i<0)return;
+
+ const temporary="Sk"+Math.random().toString(36).slice(2,8)+"!";
+ list[i].passwordHash=await hashPassword(temporary);
+ list[i].mustChangePassword=true;
+ saveCustomers(list);
+
+ document.getElementById("temporaryPassword").innerHTML=
+ "<div class='notice'><b>Temporary password — communicate to customer:</b><br>"+
+ escapeHTML(temporary)+"<br><small>Copy it now. It will not be displayed again after leaving this profile.</small></div>";
+}
+
+function deleteCustomer(){
+ if(!selectedAdminCustomer||!confirm("Delete this customer record?"))return;
+ saveCustomers(getCustomers().filter(c=>c.id!==selectedAdminCustomer));
+ selectedAdminCustomer=null;
+ document.getElementById("adminProfile").classList.add("hidden");
+ loadAdmin();
+}
+
+function adminLogout(){selectedAdminCustomer=null;showAdminLogin()}
+home();
+</script>
+</body>
+</html>
