@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,11 +41,13 @@ td,th{text-align:left;padding:10px;border-bottom:1px solid #304035;white-space:n
 <p>1. Select country and loan amount.</p><p>2. Register with your email address.</p><p>3. Review the separate 29% qualification fee before proceeding.</p><p>4. Submit payment reference for manual verification.</p><p>5. Complete identity verification after payment confirmation.</p><p>6. Track your application in your account.</p>
 <p class="small">A fee payment does not guarantee loan approval. Review all terms before paying.</p></div>
 </section>
+
 <section id="calculatorPage" class="hidden"><div class="card">
 <button class="secondary" onclick="home()">← Back</button><h2 id="countryTitle"></h2><p>Minimum loan: <b id="minimumText"></b></p>
 <label>Loan amount</label><input id="loanAmount" type="number" min="1" placeholder="Enter loan amount">
 <div class="notice"><p>Separate qualification fee — 29%</p><div class="amount" id="feePreview">0</div><p>Interest: 0%</p><p>Repayment period: <b id="daysPreview">30 days</b></p></div>
 <button onclick="calculate()">Continue</button></div></section>
+
 <section id="registerPage" class="hidden"><div class="card"><button class="secondary" onclick="backToCalculator()">← Back</button>
 <h2>Create customer account</h2><div id="registrationSummary" class="notice"></div>
 <label>Full name as shown on ID</label><input id="regName" autocomplete="name">
@@ -54,24 +57,31 @@ td,th{text-align:left;padding:10px;border-bottom:1px solid #304035;white-space:n
 <label>Password</label><input id="regPassword" type="password" autocomplete="new-password">
 <label>Confirm password</label><input id="regConfirm" type="password" autocomplete="new-password">
 <button id="registerButton" onclick="register()">Create account</button><p id="registerMessage" class="msg"></p></div></section>
+
 <section id="loginPage" class="hidden"><div class="card"><h2>Customer Login</h2>
 <label>Email address</label><input id="loginEmail" type="email" autocomplete="email">
 <label>Password</label><input id="loginPassword" type="password" autocomplete="current-password">
 <button onclick="customerLogin()">Login</button><button class="secondary" onclick="forgotPassword()">Forgot password?</button><p id="loginMessage" class="msg"></p></div></section>
+
 <section id="customerPage" class="hidden">
 <div class="card"><div class="row"><div><h2 id="customerWelcome"></h2><p id="customerCountry"></p></div><div><button class="secondary" onclick="customerLogout()">Logout</button></div></div><div id="customerOverview"></div></div>
 <div id="paymentPanel" class="card hidden"><h3>Step 1 — Qualification fee payment</h3><p>Submit your payment reference after making payment. The admin must verify the transaction before KYC is unlocked.</p>
 <div class="notice"><p>Requested loan</p><div class="amount" id="payLoan"></div><p>Separate 29% qualification fee</p><div class="amount" id="payFee"></div><p>MTN number: <b>+256 778 302 547</b></p><p>Account name: <b>EMMANUEL CHEMOS</b></p></div>
 <label>Payment transaction reference</label><input id="paymentReference" placeholder="Enter transaction/reference number"><button onclick="submitPayment()">Submit payment reference</button><p id="paymentMessage" class="msg"></p></div>
+
 <div id="kycPanel" class="card hidden"><h3>Step 2 — KYC verification</h3><div class="notice">KYC is available after manual payment confirmation. Estimated review time: about 20 seconds to up to 1 minute; actual review may take longer.</div>
 <label>ID type</label><select id="idType"><option value="">Select ID type</option><option>National ID</option><option>Passport</option><option>Driver's License</option></select>
 <label>ID number</label><input id="idNumber" placeholder="Enter ID number"><label>Upload one ID document (image or PDF, max 5MB)</label><input id="idFile" type="file" accept="image/*,.pdf">
 <button onclick="submitKyc()">Submit KYC</button><p id="kycMessage" class="msg"></p></div>
+
 <div class="card"><h3>Application tracking</h3><div id="trackingDetails"></div><hr><h3>Repayment information</h3><div id="repaymentDetails"></div><hr><h3>Admin message</h3><div id="customerMessage" class="notice"></div>
 <label>Reason for refund review</label><textarea id="refundReason" rows="2" placeholder="Explain your request"></textarea><button class="secondary" onclick="requestRefund()">Request refund review</button><p id="refundMessage" class="msg"></p></div>
+
 <div class="card"><h3>Account security</h3><button class="secondary" onclick="forgotPassword()">Send password reset email</button><p class="small">For security, password resets are completed through the email address on your account.</p></div>
 </section>
+
 <section id="adminLoginPage" class="hidden"><div class="card"><h2>Admin Login</h2><label>Admin email</label><input id="adminEmail" type="email"><label>Password</label><input id="adminPassword" type="password"><button onclick="adminLogin()">Login</button><p id="adminLoginMessage" class="msg"></p></div></section>
+
 <section id="adminPage" class="hidden"><div class="card"><div class="row"><h2>Admin Dashboard</h2><button class="secondary" onclick="adminLogout()">Logout</button></div><div id="adminStats"></div></div>
 <div class="card"><h3>Customer applications</h3><button class="secondary" onclick="loadAdmin()">Refresh records</button><div id="customerList"></div></div>
 <div id="adminProfile" class="card hidden"><h3>Manage application</h3><div id="profileDetails"></div><hr><h3>Payment verification</h3><p>Check the customer's MTN transaction independently before confirming.</p><div id="adminPaymentDetails" class="notice"></div>
@@ -84,30 +94,100 @@ td,th{text-align:left;padding:10px;border-bottom:1px solid #304035;white-space:n
 <h3>Password assistance</h3><button class="secondary" onclick="sendCustomerReset()">Send customer password-reset email</button><p id="resetMessage" class="msg"></p>
 </div></section>
 </main>
+
 <script>
 const SUPABASE_URL="https://wazkftshrwgbotdorpjq.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_YewIAT-kC9B0gy2iFL130w_bV1YcEaT";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
 let selectedCountry="",currentLoan=0,currentUser=null,currentApplication=null,selectedAdmin=null,adminApplications=[];
+
 const $=id=>document.getElementById(id);
-function show(id){["homePage","calculatorPage","registerPage","loginPage","customerPage","adminLoginPage","adminPage"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden");window.scrollTo(0,0)}
-function home(){show("homePage")}function showLogin(){show("loginPage")}function showAdminLogin(){show("adminLoginPage")}
-function money(n,c){return new Intl.NumberFormat("en-US").format(Number(n)||0)+" "+c}
-function currency(c){return c==="Uganda"?"UGX":"SSP"}function minimum(c){return c==="Uganda"?163623:117510}
+
+function show(id){
+ ["homePage","calculatorPage","registerPage","loginPage","customerPage","adminLoginPage","adminPage"].forEach(x=>$(x).classList.add("hidden"));
+ $(id).classList.remove("hidden");
+ window.scrollTo(0,0)
+}
+
+function home(){show("homePage")}
+function showLogin(){show("loginPage")}
+function showAdminLogin(){show("adminLoginPage")}
+
+function money(n,c){
+ return new Intl.NumberFormat("en-US").format(Number(n)||0)+" "+c
+}
+
+function currency(c){return c==="Uganda"?"UGX":"SSP"}
+function minimum(c){return c==="Uganda"?163623:117510}
 function feeFor(n){return Math.round(Number(n)*.29)}
-function repaymentDays(n){if(n<=300000)return 30;if(n<=500000)return 60;if(n<=1000000)return 90;if(n<=2000000)return 120;return 180}
+
+function repaymentDays(n){
+ if(n<=300000)return 30;
+ if(n<=500000)return 60;
+ if(n<=1000000)return 90;
+ if(n<=2000000)return 120;
+ return 180
+}
+
 function msg(id,t){$(id).textContent=t}
-function selectCountry(c){selectedCountry=c;$("countryTitle").textContent=c+" loan calculator";$("minimumText").textContent=money(minimum(c),currency(c));$("loanAmount").value="";updatePreview();show("calculatorPage")}
-function updatePreview(){let n=Number($("loanAmount").value)||0;$("feePreview").textContent=money(feeFor(n),currency(selectedCountry));$("daysPreview").textContent=repaymentDays(n)+" days"}
+
+function selectCountry(c){
+ selectedCountry=c;
+ $("countryTitle").textContent=c+" loan calculator";
+ $("minimumText").textContent=money(minimum(c),currency(c));
+ $("loanAmount").value="";
+ updatePreview();
+ show("calculatorPage")
+}
+
+function updatePreview(){
+ let n=Number($("loanAmount").value)||0;
+ $("feePreview").textContent=money(feeFor(n),currency(selectedCountry));
+ $("daysPreview").textContent=repaymentDays(n)+" days"
+}
+
 $("loanAmount").addEventListener("input",updatePreview);
-function calculate(){let n=Number($("loanAmount").value);if(!selectedCountry||!Number.isFinite(n)||n<minimum(selectedCountry)){alert("Enter an amount equal to or above the minimum.");return}currentLoan=n;$("registrationSummary").textContent=`Country: ${selectedCountry}\nLoan: ${money(n,currency(selectedCountry))}\nSeparate qualification fee: ${money(feeFor(n),currency(selectedCountry))}\nRepayment: ${repaymentDays(n)} days`;show("registerPage")}
+
+function calculate(){
+ let n=Number($("loanAmount").value);
+ if(!selectedCountry||!Number.isFinite(n)||n<minimum(selectedCountry)){
+  alert("Enter an amount equal to or above the minimum.");
+  return
+ }
+ currentLoan=n;
+ $("registrationSummary").textContent=`Country: ${selectedCountry}
+Loan: ${money(n,currency(selectedCountry))}
+Separate qualification fee: ${money(feeFor(n),currency(selectedCountry))}
+Repayment: ${repaymentDays(n)} days`;
+ show("registerPage")
+}
+
 function backToCalculator(){show("calculatorPage")}
+
 async function register(){
- const name=$("regName").value.trim(),email=$("regEmail").value.trim().toLowerCase(),phone=$("regPhone").value.trim(),username=$("regUsername").value.trim(),password=$("regPassword").value,confirm=$("regConfirm").value;
- if(!name||!email||!phone||!password){msg("registerMessage","Complete your name, email, phone and password.");return}
- if(password.length<8){msg("registerMessage","Use a password of at least 8 characters.");return}
- if(password!==confirm){msg("registerMessage","Passwords do not match.");return}
+ const name=$("regName").value.trim();
+ const email=$("regEmail").value.trim().toLowerCase();
+ const phone=$("regPhone").value.trim();
+ const username=$("regUsername").value.trim();
+ const password=$("regPassword").value;
+ const confirm=$("regConfirm").value;
+
+ if(!name||!email||!phone||!password){
+  msg("registerMessage","Complete your name, email, phone and password.");
+  return
+ }
+ if(password.length<8){
+  msg("registerMessage","Use a password of at least 8 characters.");
+  return
+ }
+ if(password!==confirm){
+  msg("registerMessage","Passwords do not match.");
+  return
+ }
+
  $("registerButton").disabled=true;
+
  const {data,error}=await db.auth.signUp({
   email,
   password,
@@ -122,132 +202,545 @@ async function register(){
    repayment_days:repaymentDays(currentLoan)
   }}
  });
+
  $("registerButton").disabled=false;
- if(error){msg("registerMessage",error.message);return}
- if(!data.user){msg("registerMessage","Registration could not be completed. Please try again.");return}
+
+ if(error){
+  msg("registerMessage",error.message);
+  return
+ }
+ if(!data.user){
+  msg("registerMessage","Registration could not be completed. Please try again.");
+  return
+ }
  if(data.session){
   await loadCustomer();
-  show("customerPage");
+  show("customerPage")
  }else{
-  msg("registerMessage","Account created. Confirm your email, then log in. Your loan details are saved and your application will be created after login.");
+  msg("registerMessage","Account created. Confirm your email, then log in. Your loan details are saved and your application will be created after login.")
  }
 }
-async function customerLogin(){let {data,error}=await db.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){msg("loginMessage",error.message);return}await loadCustomer();show("customerPage")}
-async function forgotPassword(){let email=$("loginEmail")?.value.trim()||currentUser?.email;if(!email){alert("Enter your account email address first.");return}let {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});alert(error?error.message:"Password reset email sent. Check your inbox and spam folder.")}
-async function customerLogout(){await db.auth.signOut();currentUser=null;currentApplication=null;showLogin()}
+
+async function customerLogin(){
+ let {data,error}=await db.auth.signInWithPassword({
+  email:$("loginEmail").value.trim(),
+  password:$("loginPassword").value
+ });
+ if(error){
+  msg("loginMessage",error.message);
+  return
+ }
+ await loadCustomer();
+ show("customerPage")
+}
+
+async function forgotPassword(){
+ let email=$("loginEmail")?.value.trim()||currentUser?.email;
+ if(!email){
+  alert("Enter your account email address first.");
+  return
+ }
+ let {error}=await db.auth.resetPasswordForEmail(email,{
+  redirectTo:location.origin+location.pathname
+ });
+ alert(error?error.message:"Password reset email sent. Check your inbox and spam folder.")
+}
+
+async function customerLogout(){
+ await db.auth.signOut();
+ currentUser=null;
+ currentApplication=null;
+ showLogin()
+}
+
 async function loadCustomer(){
- const {data:{user}}=await db.auth.getUser();if(!user)return;currentUser=user;
- const {data:apps,error}=await db.from("loan_applications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(1);
- if(error){alert("Could not load application: "+error.message);return}
+ const {data:{user}}=await db.auth.getUser();
+ if(!user)return;
+ currentUser=user;
+
+ const {data:apps,error}=await db.from("loan_applications")
+  .select("*").eq("user_id",user.id)
+  .order("created_at",{ascending:false}).limit(1);
+
+ if(error){
+  alert("Could not load application: "+error.message);
+  return
+ }
+
  currentApplication=apps?.[0]||null;
+
  if(!currentApplication){
   const meta=user.user_metadata||{};
   const country=meta.country;
   const amount=Number(meta.loan_amount);
+
   if(["Uganda","South Sudan"].includes(country)&&Number.isFinite(amount)&&amount>=minimum(country)){
    const {error:createError}=await db.from("loan_applications").insert({country,amount});
+
    if(createError){
-    const {data:retryApps}=await db.from("loan_applications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(1);
+    const {data:retryApps}=await db.from("loan_applications")
+     .select("*").eq("user_id",user.id)
+     .order("created_at",{ascending:false}).limit(1);
+
     currentApplication=retryApps?.[0]||null;
+
     if(!currentApplication){
      $("customerOverview").textContent="Your account is active, but the application could not be created: "+createError.message;
-     return;
+     return
     }
    }else{
-    const {data:newApps}=await db.from("loan_applications").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(1);
-    currentApplication=newApps?.[0]||null;
+    const {data:newApps}=await db.from("loan_applications")
+     .select("*").eq("user_id",user.id)
+     .order("created_at",{ascending:false}).limit(1);
+
+    currentApplication=newApps?.[0]||null
    }
   }
  }
- const {data:profile}=await db.from("profiles").select("*").eq("id",user.id).maybeSingle();
+
+ const {data:profile}=await db.from("profiles")
+  .select("*").eq("id",user.id).maybeSingle();
+
  $("customerWelcome").textContent="Welcome, "+(profile?.full_name||user.email);
  $("customerCountry").textContent=(currentApplication?.country||profile?.country||"Customer")+" • "+user.email;
- if(!currentApplication){$("customerOverview").textContent="No loan application found.";return}
+
+ if(!currentApplication){
+  $("customerOverview").textContent="No loan application found.";
+  return
+ }
+
  const a=currentApplication;
- $("customerOverview").innerHTML=`<div class="stat">Loan requested<br><b>${money(a.amount,a.currency)}</b></div><div class="stat">Separate fee<br><b>${money(a.qualification_fee,a.currency)}</b></div><div class="stat">Repayment<br><b>${a.repayment_days} days</b></div>`;
+
+ $("customerOverview").innerHTML=`
+ <div class="stat">Loan requested<br><b>${money(a.amount,a.currency)}</b></div>
+ <div class="stat">Separate fee<br><b>${money(a.qualification_fee,a.currency)}</b></div>
+ <div class="stat">Repayment<br><b>${a.repayment_days} days</b></div>`;
+
  $("paymentPanel").classList.toggle("hidden",String(a.payment_status||"").toLowerCase()==="confirmed");
  $("kycPanel").classList.toggle("hidden",String(a.payment_status||"").toLowerCase()!=="confirmed");
- $("payLoan").textContent=money(a.amount,a.currency);$("payFee").textContent=money(a.qualification_fee,a.currency);
- msg("paymentMessage",String(a.payment_status||"").toLowerCase()==="reference submitted"?"Reference awaiting manual verification.":String(a.payment_status||"").toLowerCase()==="rejected"?"Payment reference rejected. Submit a valid reference.":"");
- $("trackingDetails").innerHTML=`<p>Application: <b>${esc(a.application_status)}</b></p><p>Payment: <b>${esc(a.payment_status)}</b></p><p>KYC: <b>${esc(a.kyc_status)}</b></p><p>Eligibility: <b>${a.eligibility?"Eligible":"Pending / Not eligible"}</b></p><p>Refund: <b>${esc(a.refund_status)}</b></p>`;
- $("repaymentDetails").innerHTML=`<p>Principal: <b>${money(a.amount,a.currency)}</b></p><p>Interest: <b>0%</b></p><p>Repayment period: <b>${a.repayment_days} days</b></p><p>The qualification fee is separate from the loan principal.</p>`;
+
+ $("payLoan").textContent=money(a.amount,a.currency);
+ $("payFee").textContent=money(a.qualification_fee,a.currency);
+
+ msg("paymentMessage",
+  String(a.payment_status||"").toLowerCase()==="reference submitted"
+   ?"Reference awaiting manual verification."
+   :String(a.payment_status||"").toLowerCase()==="rejected"
+    ?"Payment reference rejected. Submit a valid reference."
+    :""
+ );
+
+ $("trackingDetails").innerHTML=`
+ <p>Application: <b>${esc(a.application_status)}</b></p>
+ <p>Payment: <b>${esc(a.payment_status)}</b></p>
+ <p>KYC: <b>${esc(a.kyc_status)}</b></p>
+ <p>Eligibility: <b>${a.eligibility?"Eligible":"Pending / Not eligible"}</b></p>
+ <p>Refund: <b>${esc(a.refund_status)}</b></p>`;
+
+ $("repaymentDetails").innerHTML=`
+ <p>Principal: <b>${money(a.amount,a.currency)}</b></p>
+ <p>Interest: <b>0%</b></p>
+ <p>Repayment period: <b>${a.repayment_days} days</b></p>
+ <p>The qualification fee is separate from the loan principal.</p>`;
+
  msg("customerMessage",a.admin_message||"No new messages.");
- const {data:kyc}=await db.from("kyc_submissions").select("status,admin_note").eq("application_id",a.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
- if(kyc)msg("kycMessage",`KYC status: ${kyc.status}. ${kyc.admin_note||""}`);
+
+ const {data:kyc}=await db.from("kyc_submissions")
+  .select("status,admin_note").eq("application_id",a.id)
+  .order("created_at",{ascending:false}).limit(1).maybeSingle();
+
+ if(kyc)msg("kycMessage",`KYC status: ${kyc.status}. ${kyc.admin_note||""}`)
 }
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function esc(v){
+ return String(v??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+ }[c]))
+}
+
 async function submitPayment(){
- if(!currentApplication)return;let ref=$("paymentReference").value.trim();if(!ref){alert("Enter the transaction reference.");return}
- const {error}=await db.from("payment_submissions").insert({application_id:currentApplication.id,user_id:currentUser.id,transaction_reference:ref,status:"Submitted"});
- if(error){msg("paymentMessage","Could not submit reference: "+error.message);return}
- const {error:updateError}=await db.from("loan_applications").update({payment_reference:ref,payment_status:"Reference Submitted"}).eq("id",currentApplication.id).eq("user_id",currentUser.id);
- if(updateError){msg("paymentMessage","Reference saved, but application status update failed: "+updateError.message);return}
- msg("paymentMessage","Reference submitted for manual verification.");await loadCustomer()
+ if(!currentApplication)return;
+ let ref=$("paymentReference").value.trim();
+ if(!ref){
+  alert("Enter the transaction reference.");
+  return
+ }
+
+ const {error}=await db.from("payment_submissions").insert({
+  application_id:currentApplication.id,
+  user_id:currentUser.id,
+  transaction_reference:ref,
+  status:"Submitted"
+ });
+
+ if(error){
+  msg("paymentMessage","Could not submit reference: "+error.message);
+  return
+ }
+
+ const {error:updateError}=await db.from("loan_applications")
+  .update({payment_reference:ref,payment_status:"Reference Submitted"})
+  .eq("id",currentApplication.id).eq("user_id",currentUser.id);
+
+ if(updateError){
+  msg("paymentMessage","Reference saved, but application status update failed: "+updateError.message);
+  return
+ }
+
+ msg("paymentMessage","Reference submitted for manual verification.");
+ await loadCustomer()
 }
+
 async function submitKyc(){
- if(!currentApplication||String(currentApplication.payment_status||"").toLowerCase()!=="confirmed"){alert("Payment must be confirmed first.");return}
- let type=$("idType").value,num=$("idNumber").value.trim(),file=$("idFile").files[0];
- if(!type||!num||!file){alert("Complete ID details and select a document.");return}
- if(file.size>5*1024*1024){alert("Maximum file size is 5MB.");return}
- const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_"),path=`${currentUser.id}/${currentApplication.id}/${Date.now()}_${safe}`;
- const {error:uploadError}=await db.storage.from("sharekati-kyc").upload(path,file,{upsert:false,contentType:file.type||"application/octet-stream"});
- if(uploadError){msg("kycMessage","Document upload failed: "+uploadError.message);return}
- const {error}=await db.from("kyc_submissions").insert({application_id:currentApplication.id,user_id:currentUser.id,document_type:type,document_number:num,storage_path:path,status:"Pending"});
- if(error){msg("kycMessage","Document uploaded but KYC record failed: "+error.message);return}
- const {error:updateError}=await db.from("loan_applications").update({kyc_status:"Pending",kyc_document_type:type,kyc_document_path:path,application_status:"Under Review"}).eq("id",currentApplication.id).eq("user_id",currentUser.id);
- if(updateError){msg("kycMessage","KYC record submitted, but application update failed: "+updateError.message);return}
- msg("kycMessage","KYC submitted for review.");await loadCustomer()
+ if(!currentApplication||String(currentApplication.payment_status||"").toLowerCase()!=="confirmed"){
+  alert("Payment must be confirmed first.");
+  return
+ }
+
+ let type=$("idType").value;
+ let num=$("idNumber").value.trim();
+ let file=$("idFile").files[0];
+
+ if(!type||!num||!file){
+  alert("Complete ID details and select a document.");
+  return
+ }
+ if(file.size>5*1024*1024){
+  alert("Maximum file size is 5MB.");
+  return
+ }
+
+ const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+ const path=`${currentUser.id}/${currentApplication.id}/${Date.now()}_${safe}`;
+
+ const {error:uploadError}=await db.storage.from("sharekati-kyc")
+  .upload(path,file,{
+   upsert:false,
+   contentType:file.type||"application/octet-stream"
+  });
+
+ if(uploadError){
+  msg("kycMessage","Document upload failed: "+uploadError.message);
+  return
+ }
+
+ const {error}=await db.from("kyc_submissions").insert({
+  application_id:currentApplication.id,
+  user_id:currentUser.id,
+  document_type:type,
+  document_number:num,
+  storage_path:path,
+  status:"Pending"
+ });
+
+ if(error){
+  msg("kycMessage","Document uploaded but KYC record failed: "+error.message);
+  return
+ }
+
+ const {error:updateError}=await db.from("loan_applications")
+  .update({
+   kyc_status:"Pending",
+   kyc_document_type:type,
+   kyc_document_path:path,
+   application_status:"Under Review"
+  })
+  .eq("id",currentApplication.id).eq("user_id",currentUser.id);
+
+ if(updateError){
+  msg("kycMessage","KYC record submitted, but application update failed: "+updateError.message);
+  return
+ }
+
+ msg("kycMessage","KYC submitted for review.");
+ await loadCustomer()
 }
-async function requestRefund(){if(!currentApplication)return;let reason=$("refundReason").value.trim();if(!reason){alert("Enter a reason for the refund review.");return}
- const {error}=await db.from("refund_requests").insert({application_id:currentApplication.id,user_id:currentUser.id,reason,status:"Requested"});
- if(error){msg("refundMessage",error.message);return}
- const {error:e2}=await db.from("loan_applications").update({refund_status:"Requested"}).eq("id",currentApplication.id).eq("user_id",currentUser.id);
- msg("refundMessage",e2?"Request submitted; application status could not be updated: "+e2.message:"Refund review request submitted.");await loadCustomer()
+
+async function requestRefund(){
+ if(!currentApplication)return;
+ let reason=$("refundReason").value.trim();
+ if(!reason){
+  alert("Enter a reason for the refund review.");
+  return
+ }
+
+ const {error}=await db.from("refund_requests").insert({
+  application_id:currentApplication.id,
+  user_id:currentUser.id,
+  reason,
+  status:"Requested"
+ });
+
+ if(error){
+  msg("refundMessage",error.message);
+  return
+ }
+
+ const {error:e2}=await db.from("loan_applications")
+  .update({refund_status:"Requested"})
+  .eq("id",currentApplication.id).eq("user_id",currentUser.id);
+
+ msg("refundMessage",e2
+  ?"Request submitted; application status could not be updated: "+e2.message
+  :"Refund review request submitted.");
+
+ await loadCustomer()
 }
-async function adminLogin(){let {data,error}=await db.auth.signInWithPassword({email:$("adminEmail").value.trim(),password:$("adminPassword").value});if(error){msg("adminLoginMessage",error.message);return}
- const {data:profile,error:pErr}=await db.from("profiles").select("role").eq("id",data.user.id).single();
- if(pErr||profile?.role!=="admin"){await db.auth.signOut();msg("adminLoginMessage","This account does not have the admin role.");return}
- await loadAdmin();show("adminPage")}
+
+async function adminLogin(){
+ let {data,error}=await db.auth.signInWithPassword({
+  email:$("adminEmail").value.trim(),
+  password:$("adminPassword").value
+ });
+
+ if(error){
+  msg("adminLoginMessage",error.message);
+  return
+ }
+
+ const {data:profile,error:pErr}=await db.from("profiles")
+  .select("role").eq("id",data.user.id).single();
+
+ if(pErr||profile?.role!=="admin"){
+  await db.auth.signOut();
+  msg("adminLoginMessage","This account does not have the admin role.");
+  return
+ }
+
+ await loadAdmin();
+ show("adminPage")
+}
+
 async function loadAdmin(){
- const {data,error}=await db.from("loan_applications").select("*").order("created_at",{ascending:false});
- if(error){$("customerList").textContent="Could not load applications: "+error.message;return}
+ const {data,error}=await db.from("loan_applications")
+  .select("*").order("created_at",{ascending:false});
+
+ if(error){
+  $("customerList").textContent="Could not load applications: "+error.message;
+  return
+ }
+
  adminApplications=data||[];
- const count=s=>adminApplications.filter(a=>String(a.payment_status||"").toLowerCase()===s.toLowerCase()).length;
- $("adminStats").innerHTML=`<div class="stat">Applications<br><b>${adminApplications.length}</b></div><div class="stat">Awaiting payment<br><b>${count("Pending")}</b></div><div class="stat">References submitted<br><b>${count("Reference Submitted")}</b></div><div class="stat">Confirmed<br><b>${count("Confirmed")}</b></div>`;
- $("customerList").innerHTML=adminApplications.length?adminApplications.map(a=>`<div class="notice"><b>${esc(a.country)} — ${money(a.amount,a.currency)}</b><br>Application: ${esc(a.application_status)}<br>Payment: ${esc(a.payment_status)}<br>KYC: ${esc(a.kyc_status)}<br><button class="secondary" onclick="openAdminProfile('${a.id}')">Manage application</button></div>`).join(""):"No applications found.";
+
+ const count=s=>adminApplications.filter(
+  a=>String(a.payment_status||"").toLowerCase()===s.toLowerCase()
+ ).length;
+
+ $("adminStats").innerHTML=`
+ <div class="stat">Applications<br><b>${adminApplications.length}</b></div>
+ <div class="stat">Awaiting payment<br><b>${count("Pending")}</b></div>
+ <div class="stat">References submitted<br><b>${count("Reference Submitted")}</b></div>
+ <div class="stat">Confirmed<br><b>${count("Confirmed")}</b></div>`;
+
+ $("customerList").innerHTML=adminApplications.length
+  ?adminApplications.map(a=>`
+   <div class="notice">
+   <b>${esc(a.country)} — ${money(a.amount,a.currency)}</b><br>
+   Application: ${esc(a.application_status)}<br>
+   Payment: ${esc(a.payment_status)}<br>
+   KYC: ${esc(a.kyc_status)}<br>
+   <button class="secondary" onclick="openAdminProfile('${a.id}')">Manage application</button>
+   </div>`).join("")
+  :"No applications found."
 }
+
+/* ADMIN PROFILE WITH SECURE KYC DOCUMENT VIEWING */
 async function openAdminProfile(id){
- selectedAdmin=adminApplications.find(a=>a.id===id);if(!selectedAdmin)return;let a=selectedAdmin;
- const {data:pay}=await db.from("payment_submissions").select("*").eq("application_id",id).order("created_at",{ascending:false}).limit(1).maybeSingle();
- const {data:kyc}=await db.from("kyc_submissions").select("*").eq("application_id",id).order("created_at",{ascending:false}).limit(1).maybeSingle();
- const {data:profile}=await db.from("profiles").select("*").eq("id",a.user_id).maybeSingle();
- $("profileDetails").innerHTML=`<p>Name: <b>${esc(profile?.full_name||"Not available")}</b></p><p>Email: ${esc(profile?.email||"Not available")}</p><p>Phone: ${esc(profile?.phone||"Not available")}</p><p>Country: ${esc(a.country)}</p><p>Loan: ${money(a.amount,a.currency)}</p><p>Qualification fee: ${money(a.qualification_fee,a.currency)}</p><p>Application ID: ${esc(a.id)}</p><p>KYC document: ${kyc?esc(kyc.document_type+" — "+kyc.document_number):"Not submitted"}</p><p>Stored file: ${kyc?esc(kyc.storage_path):"Not submitted"}</p>`;
- $("adminPaymentDetails").textContent=`Application payment reference: ${a.payment_reference||"None"}\nLatest payment submission: ${pay?.transaction_reference||"None"}\nSubmission status: ${pay?.status||"None"}\nFee: ${money(a.qualification_fee,a.currency)}\nKYC status: ${kyc?.status||"Not submitted"}`;
- $("editApplication").value=a.application_status;$("editKyc").value=a.kyc_status;$("editEligibility").value=String(!!a.eligibility);$("editRefund").value=a.refund_status;$("editMessage").value=a.admin_message||"";
- $("adminProfile").classList.remove("hidden");msg("resetMessage","")
+ selectedAdmin=adminApplications.find(a=>a.id===id);
+ if(!selectedAdmin)return;
+ let a=selectedAdmin;
+
+ const {data:pay}=await db.from("payment_submissions")
+  .select("*").eq("application_id",id)
+  .order("created_at",{ascending:false}).limit(1).maybeSingle();
+
+ const {data:kyc}=await db.from("kyc_submissions")
+  .select("*").eq("application_id",id)
+  .order("created_at",{ascending:false}).limit(1).maybeSingle();
+
+ const {data:profile}=await db.from("profiles")
+  .select("*").eq("id",a.user_id).maybeSingle();
+
+ let documentView="Not submitted";
+
+ if(kyc?.storage_path){
+  const {data:fileLink,error:fileError}=await db.storage
+   .from("sharekati-kyc")
+   .createSignedUrl(kyc.storage_path,600);
+
+  documentView=fileError
+   ? "Unable to create viewing link: "+esc(fileError.message)
+   : fileLink?.signedUrl
+    ? `<a href="${esc(fileLink.signedUrl)}" target="_blank" rel="noopener noreferrer" style="color:#51d982;font-weight:bold">View uploaded ID document</a>`
+    : "Unable to create viewing link.";
+ }
+
+ $("profileDetails").innerHTML=`
+  <p>Name: <b>${esc(profile?.full_name||"Not available")}</b></p>
+  <p>Email: ${esc(profile?.email||"Not available")}</p>
+  <p>Phone: ${esc(profile?.phone||"Not available")}</p>
+  <p>Country: ${esc(a.country)}</p>
+  <p>Loan: ${money(a.amount,a.currency)}</p>
+  <p>Qualification fee: ${money(a.qualification_fee,a.currency)}</p>
+  <p>Application ID: ${esc(a.id)}</p>
+  <p>KYC document: ${kyc?esc(kyc.document_type+" — "+kyc.document_number):"Not submitted"}</p>
+  <p>Uploaded document: ${documentView}</p>
+ `;
+
+ $("adminPaymentDetails").textContent=
+  `Application payment reference: ${a.payment_reference||"None"}
+Latest payment submission: ${pay?.transaction_reference||"None"}
+Submission status: ${pay?.status||"None"}
+Fee: ${money(a.qualification_fee,a.currency)}
+KYC status: ${kyc?.status||"Not submitted"}`;
+
+ $("editApplication").value=a.application_status;
+ $("editKyc").value=a.kyc_status;
+ $("editEligibility").value=String(!!a.eligibility);
+ $("editRefund").value=a.refund_status;
+ $("editMessage").value=a.admin_message||"";
+
+ $("adminProfile").classList.remove("hidden");
+ msg("resetMessage","");
 }
-async function confirmPayment(){if(!selectedAdmin)return;if(!confirm("Have you personally verified the payment in your MTN transaction history?"))return;
- let {error}=await db.from("loan_applications").update({payment_status:"confirmed",kyc_status:"Pending",admin_message:"Your qualification fee has been manually confirmed. You can now complete KYC."}).eq("id",selectedAdmin.id);
- if(error){alert(error.message);return}
- await db.from("payment_submissions").update({status:"Confirmed"}).eq("application_id",selectedAdmin.id);
- await loadAdmin();await openAdminProfile(selectedAdmin.id);alert("Payment marked confirmed.")}
-async function rejectPayment(){if(!selectedAdmin)return;if(!confirm("Reject this payment reference?"))return;
- let {error}=await db.from("loan_applications").update({payment_status:"Rejected",kyc_status:"Locked",admin_message:"Your payment reference was rejected. Please contact support."}).eq("id",selectedAdmin.id);
- if(error){alert(error.message);return}
- await db.from("payment_submissions").update({status:"Rejected"}).eq("application_id",selectedAdmin.id);
- await loadAdmin();await openAdminProfile(selectedAdmin.id)}
-async function saveProfile(){if(!selectedAdmin)return;
- let patch={application_status:$("editApplication").value,kyc_status:$("editKyc").value,eligibility:$("editEligibility").value==="true",refund_status:$("editRefund").value,admin_message:$("editMessage").value.trim(),updated_at:new Date().toISOString()};
- if(String(selectedAdmin.payment_status||"").toLowerCase()!=="confirmed")patch.kyc_status="Locked";
- const {error}=await db.from("loan_applications").update(patch).eq("id",selectedAdmin.id);
- if(error){alert("Save failed: "+error.message);return}
- await db.from("kyc_submissions").update({status:patch.kyc_status}).eq("application_id",selectedAdmin.id);
- await db.from("refund_requests").update({status:patch.refund_status}).eq("application_id",selectedAdmin.id);
- await loadAdmin();await openAdminProfile(selectedAdmin.id);alert("Application updates saved.")}
-async function sendCustomerReset(){if(!selectedAdmin)return;const {data:profile}=await db.from("profiles").select("email").eq("id",selectedAdmin.user_id).maybeSingle();if(!profile?.email){msg("resetMessage","Customer email not found in profile.");return}
- const {error}=await db.auth.resetPasswordForEmail(profile.email,{redirectTo:location.origin+location.pathname});msg("resetMessage",error?error.message:"Password reset email sent to "+profile.email)}
-async function adminLogout(){await db.auth.signOut();selectedAdmin=null;showAdminLogin()}
-async function init(){const {data:{session}}=await db.auth.getSession();if(session){const {data:p}=await db.from("profiles").select("role").eq("id",session.user.id).maybeSingle();if(p?.role==="admin"){await loadAdmin();show("adminPage")}else{await loadCustomer();show("customerPage")}}else home()}
-db.auth.onAuthStateChange(()=>{});init();
+
+async function confirmPayment(){
+ if(!selectedAdmin)return;
+ if(!confirm("Have you personally verified the payment in your MTN transaction history?"))return;
+
+ let {error}=await db.from("loan_applications")
+  .update({
+   payment_status:"confirmed",
+   kyc_status:"Pending",
+   admin_message:"Your qualification fee has been manually confirmed. You can now complete KYC."
+  })
+  .eq("id",selectedAdmin.id);
+
+ if(error){
+  alert(error.message);
+  return
+ }
+
+ await db.from("payment_submissions")
+  .update({status:"Confirmed"}).eq("application_id",selectedAdmin.id);
+
+ await loadAdmin();
+ await openAdminProfile(selectedAdmin.id);
+ alert("Payment marked confirmed.")
+}
+
+async function rejectPayment(){
+ if(!selectedAdmin)return;
+ if(!confirm("Reject this payment reference?"))return;
+
+ let {error}=await db.from("loan_applications")
+  .update({
+   payment_status:"Rejected",
+   kyc_status:"Locked",
+   admin_message:"Your payment reference was rejected. Please contact support."
+  })
+  .eq("id",selectedAdmin.id);
+
+ if(error){
+  alert(error.message);
+  return
+ }
+
+ await db.from("payment_submissions")
+  .update({status:"Rejected"}).eq("application_id",selectedAdmin.id);
+
+ await loadAdmin();
+ await openAdminProfile(selectedAdmin.id)
+}
+
+async function saveProfile(){
+ if(!selectedAdmin)return;
+
+ let patch={
+  application_status:$("editApplication").value,
+  kyc_status:$("editKyc").value,
+  eligibility:$("editEligibility").value==="true",
+  refund_status:$("editRefund").value,
+  admin_message:$("editMessage").value.trim(),
+  updated_at:new Date().toISOString()
+ };
+
+ if(String(selectedAdmin.payment_status||"").toLowerCase()!=="confirmed"){
+  patch.kyc_status="Locked"
+ }
+
+ const {error}=await db.from("loan_applications")
+  .update(patch).eq("id",selectedAdmin.id);
+
+ if(error){
+  alert("Save failed: "+error.message);
+  return
+ }
+
+ await db.from("kyc_submissions")
+  .update({status:patch.kyc_status})
+  .eq("application_id",selectedAdmin.id);
+
+ await db.from("refund_requests")
+  .update({status:patch.refund_status})
+  .eq("application_id",selectedAdmin.id);
+
+ await loadAdmin();
+ await openAdminProfile(selectedAdmin.id);
+ alert("Application updates saved.")
+}
+
+async function sendCustomerReset(){
+ if(!selectedAdmin)return;
+
+ const {data:profile}=await db.from("profiles")
+  .select("email").eq("id",selectedAdmin.user_id).maybeSingle();
+
+ if(!profile?.email){
+  msg("resetMessage","Customer email not found in profile.");
+  return
+ }
+
+ const {error}=await db.auth.resetPasswordForEmail(profile.email,{
+  redirectTo:location.origin+location.pathname
+ });
+
+ msg("resetMessage",error
+  ?error.message
+  :"Password reset email sent to "+profile.email)
+}
+
+async function adminLogout(){
+ await db.auth.signOut();
+ selectedAdmin=null;
+ showAdminLogin()
+}
+
+async function init(){
+ const {data:{session}}=await db.auth.getSession();
+
+ if(session){
+  const {data:p}=await db.from("profiles")
+   .select("role").eq("id",session.user.id).maybeSingle();
+
+  if(p?.role==="admin"){
+   await loadAdmin();
+   show("adminPage")
+  }else{
+   await loadCustomer();
+   show("customerPage")
+  }
+ }else{
+  home()
+ }
+}
+
+db.auth.onAuthStateChange(()=>{});
+init();
 </script>
-</body></html>
+</body>
+</html>
